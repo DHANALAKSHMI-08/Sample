@@ -38,6 +38,10 @@
             text-decoration: none;
         }
 
+        .sidebar nav ul.hidden {
+            display: none;
+        }
+
         .main-content {
             flex-grow: 1;
             padding: 20px;
@@ -65,6 +69,15 @@
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 5px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .date-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         #summary {
@@ -82,6 +95,9 @@
     </style>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            const dashboardLink = document.getElementById('dashboard');
+            const menuItems = document.getElementById('menu-items');
+
             const monthSelect = document.getElementById('month');
             const bookingTypeSelect = document.getElementById('booking-type');
             const reasonSelect = document.getElementById('reason');
@@ -92,6 +108,10 @@
             const currentDate = new Date();
             const currentMonth = currentDate.getMonth(); // 0-indexed: January = 0
             const currentYear = currentDate.getFullYear();
+
+            dashboardLink.addEventListener('click', () => {
+                menuItems.classList.toggle('hidden');
+            });
 
             // Populate month dropdown with only the next month
             populateMonthDropdown();
@@ -135,10 +155,13 @@
                 const weeks = getWeeksForMonth(year, month);
                 calendarContainer.innerHTML = '';
 
-                weeks.forEach((week, index) => {
-                    const weekDiv = document.createElement('div');
-                    weekDiv.innerHTML = `<h3>Week ${index + 1}</h3>`;
+                weeks.forEach((week) => {
                     week.forEach(day => {
+                        if (day.isWeekend) return; // Skip weekends
+
+                        const dateDiv = document.createElement('div');
+                        dateDiv.className = 'date-checkbox';
+
                         const checkbox = document.createElement('input');
                         checkbox.type = 'checkbox';
                         checkbox.value = day.date;
@@ -149,10 +172,10 @@
                         label.htmlFor = `day-${day.date}`;
                         label.innerText = day.date;
 
-                        weekDiv.appendChild(checkbox);
-                        weekDiv.appendChild(label);
+                        dateDiv.appendChild(checkbox);
+                        dateDiv.appendChild(label);
+                        calendarContainer.appendChild(dateDiv);
                     });
-                    calendarContainer.appendChild(weekDiv);
                 });
             }
 
@@ -199,13 +222,15 @@
         });
     </script>
 </head>
-
 <body>
     <div class="container">
         <!-- Sidebar -->
         <aside class="sidebar">
             <nav>
                 <ul>
+                    <li><a href="#" id="dashboard">Dashboard</a></li>
+                </ul>
+                <ul id="menu-items" class="hidden">
                     <li><a href="#" id="home">Home</a></li>
                     <li><a href="#" id="booking-history">Booking History</a></li>
                     <li><a href="#" id="logout">Logout</a></li>
@@ -221,6 +246,16 @@
                 <div class="form-group">
                     <label for="employee-id">Employee ID:</label>
                     <input type="number" id="employee-id" name="employee-id" minlength="7" maxlength="7" required>
+                </div>
+
+                <!-- Location -->
+                <div class="form-group">
+                    <label for="location">Location:</label>
+                    <select id="location" name="locationId">
+                        <option value="">Select an option</option>
+                        <option value="1">CKC-Chennai</option>
+                        <option value="2">MEPZ-Chennai</option>
+                    </select>
                 </div>
 
                 <!-- Month Selection -->
@@ -254,6 +289,18 @@
                 <!-- Calendar Placeholder -->
                 <div id="calendar-container">
                     <p>Select a month and booking type to see available dates.</p>
+                </div>
+
+                <!-- Time From -->
+                <div class="form-group">
+                    <label for="time-from">Time From:</label>
+                    <input type="time" id="time-from" name="time-from">
+                </div>
+
+                <!-- Time To -->
+                <div class="form-group">
+                    <label for="time-to">Time To:</label>
+                    <input type="time" id="time-to" name="time-to">
                 </div>
 
                 <!-- Summary -->
