@@ -1,0 +1,231 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    display: flex;
+    height: 100vh;
+}
+
+.container {
+    display: flex;
+    width: 100%;
+}
+
+.sidebar {
+    background-color: #2c3e50;
+    color: white;
+    width: 200px;
+    padding: 20px;
+}
+
+.sidebar nav ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.sidebar nav ul li {
+    margin-bottom: 10px;
+}
+
+.sidebar nav ul li a {
+    color: white;
+    text-decoration: none;
+}
+
+.main-content {
+    flex-grow: 1;
+    padding: 20px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+input, select, button {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+#calendar-container {
+    margin: 20px 0;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+#summary {
+    margin-top: 20px;
+}
+
+#selected-dates {
+    list-style-type: none;
+    padding: 0;
+}
+document.addEventListener('DOMContentLoaded', () => {
+    const monthSelect = document.getElementById('month');
+    const bookingTypeSelect = document.getElementById('booking-type');
+    const calendarContainer = document.getElementById('calendar-container');
+    const summaryList = document.getElementById('selected-dates');
+    const showSeatsButton = document.getElementById('show-seats');
+
+    monthSelect.addEventListener('change', updateCalendar);
+    bookingTypeSelect.addEventListener('change', updateCalendar);
+
+    function updateCalendar() {
+        const selectedMonth = monthSelect.value;
+        const bookingType = bookingTypeSelect.value;
+
+        if (!selectedMonth || !bookingType) {
+            calendarContainer.innerHTML = "<p>Select a month and booking type to see available dates.</p>";
+            return;
+        }
+
+        const weeks = getWeeksForMonth(selectedMonth);
+        calendarContainer.innerHTML = '';
+
+        weeks.forEach((week, index) => {
+            const weekDiv = document.createElement('div');
+            weekDiv.innerHTML = `<h3>Week ${index + 1}</h3>`;
+            week.forEach(day => {
+                if (day.isWeekend) return; // Skip weekends
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.value = day.date;
+                checkbox.id = `day-${day.date}`;
+                checkbox.addEventListener('change', toggleDateSelection);
+
+                const label = document.createElement('label');
+                label.htmlFor = `day-${day.date}`;
+                label.innerText = day.date;
+
+                weekDiv.appendChild(checkbox);
+                weekDiv.appendChild(label);
+            });
+            calendarContainer.appendChild(weekDiv);
+        });
+    }
+
+    function toggleDateSelection(event) {
+        const date = event.target.value;
+        if (event.target.checked) {
+            const listItem = document.createElement('li');
+            listItem.id = `selected-${date}`;
+            listItem.textContent = date;
+            summaryList.appendChild(listItem);
+        } else {
+            const listItem = document.getElementById(`selected-${date}`);
+            if (listItem) summaryList.removeChild(listItem);
+        }
+    }
+
+    function getWeeksForMonth(month) {
+        // Dummy logic to generate days for a month.
+        const daysInMonth = new Date(2024, new Date(Date.parse(month + " 1, 2024")).getMonth() + 1, 0).getDate();
+        const weeks = [];
+        let week = [];
+
+        for (let day = 1; day <= daysInMonth; day++) {
+            const date = new Date(2024, new Date(Date.parse(month + " 1, 2024")).getMonth(), day);
+            week.push({ date: day, isWeekend: date.getDay() === 0 || date.getDay() === 6 });
+            if (week.length === 7 || day === daysInMonth) {
+                weeks.push(week);
+                week = [];
+            }
+        }
+
+        return weeks;
+    }
+});
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Homepage</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="script.js" defer></script>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <nav>
+                <ul>
+                    <li><a href="#" id="home">Home</a></li>
+                    <li><a href="#" id="booking-history">Booking History</a></li>
+                    <li><a href="#" id="logout">Logout</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <h1>Book Your Seat</h1>
+            <form id="booking-form">
+                <!-- Employee ID -->
+                <div class="form-group">
+                    <label for="employee-id">Employee ID:</label>
+                    <input type="number" id="employee-id" name="employee-id" minlength="7" maxlength="7" required>
+                </div>
+
+                <!-- Month Selection -->
+                <div class="form-group">
+                    <label for="month">Select Month:</label>
+                    <select id="month" name="month" required>
+                        <option value="">--Select Month--</option>
+                        <option value="January">January</option>
+                        <option value="February">February</option>
+                        <option value="March">March</option>
+                        <option value="April">April</option>
+                        <option value="May">May</option>
+                        <option value="June">June</option>
+                        <option value="July">July</option>
+                        <option value="August">August</option>
+                        <option value="September">September</option>
+                        <option value="October">October</option>
+                        <option value="November">November</option>
+                        <option value="December">December</option>
+                    </select>
+                </div>
+
+                <!-- Booking Type Selection -->
+                <div class="form-group">
+                    <label for="booking-type">Booking Type:</label>
+                    <select id="booking-type" name="booking-type" required>
+                        <option value="">--Select Type--</option>
+                        <option value="Regular">Regular</option>
+                        <option value="Irregular">Irregular</option>
+                    </select>
+                </div>
+
+                <!-- Calendar Placeholder -->
+                <div id="calendar-container">
+                    <p>Select a month and booking type to see available dates.</p>
+                </div>
+
+                <!-- Summary -->
+                <div id="summary">
+                    <h2>Selected Dates</h2>
+                    <ul id="selected-dates"></ul>
+                    <button type="button" id="show-seats">Show Seats</button>
+                </div>
+
+                <!-- Save Button -->
+                <div class="form-group">
+                    <button type="submit" id="save-booking">Save</button>
+                </div>
+            </form>
+        </main>
+    </div>
+</body>
+
+</html>
