@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html>
 <head>
     <title>Book a Seat</title>
     <meta charset="UTF-8">
@@ -89,24 +89,30 @@
             const summaryList = document.getElementById('selected-dates');
             const showSeatsButton = document.getElementById('show-seats');
 
-            const currentMonth = new Date().getMonth() + 1;
+            const currentDate = new Date();
+            const currentMonth = currentDate.getMonth(); // 0-indexed: January = 0
+            const currentYear = currentDate.getFullYear();
 
-            // Restrict month selection to past months only
-            monthSelect.addEventListener('change', () => {
-                const selectedMonth = new Date(Date.parse(monthSelect.value + " 1, 2024")).getMonth() + 1;
-                if (selectedMonth >= currentMonth) {
-                    alert("You can only book seats for past months.");
-                    monthSelect.value = '';
-                }
-                updateCalendar();
-            });
+            // Populate month dropdown with only the next month
+            populateMonthDropdown();
 
+            monthSelect.addEventListener('change', updateCalendar);
             bookingTypeSelect.addEventListener('change', () => {
                 toggleReasonField();
                 updateCalendar();
             });
 
             showSeatsButton.addEventListener('click', handleShowSeats);
+
+            function populateMonthDropdown() {
+                const nextMonth = (currentMonth + 1) % 12; // Next month
+                const nextYear = currentMonth === 11 ? currentYear + 1 : currentYear;
+
+                const option = document.createElement('option');
+                option.value = `${nextYear}-${nextMonth + 1}`; // Format: YYYY-MM
+                option.textContent = new Date(nextYear, nextMonth, 1).toLocaleString('default', { month: 'long', year: 'numeric' });
+                monthSelect.appendChild(option);
+            }
 
             function toggleReasonField() {
                 const bookingType = bookingTypeSelect.value;
@@ -118,22 +124,21 @@
             }
 
             function updateCalendar() {
-                const selectedMonth = monthSelect.value;
-                const bookingType = bookingTypeSelect.value;
+                const selectedValue = monthSelect.value;
 
-                if (!selectedMonth || !bookingType) {
-                    calendarContainer.innerHTML = "<p>Select a month and booking type to see available dates.</p>";
+                if (!selectedValue) {
+                    calendarContainer.innerHTML = "<p>Please select a month and booking type to view available dates.</p>";
                     return;
                 }
 
-                const weeks = getWeeksForMonth(selectedMonth);
+                const [year, month] = selectedValue.split('-').map(Number);
+                const weeks = getWeeksForMonth(year, month);
                 calendarContainer.innerHTML = '';
 
                 weeks.forEach((week, index) => {
                     const weekDiv = document.createElement('div');
                     weekDiv.innerHTML = `<h3>Week ${index + 1}</h3>`;
                     week.forEach(day => {
-                        if (day.isWeekend) return; // Skip weekends
                         const checkbox = document.createElement('input');
                         checkbox.type = 'checkbox';
                         checkbox.value = day.date;
@@ -164,14 +169,14 @@
                 }
             }
 
-            function getWeeksForMonth(month) {
-                const daysInMonth = new Date(2024, new Date(Date.parse(month + " 1, 2024")).getMonth() + 1, 0).getDate();
+            function getWeeksForMonth(year, month) {
+                const daysInMonth = new Date(year, month, 0).getDate();
                 const weeks = [];
                 let week = [];
 
                 for (let day = 1; day <= daysInMonth; day++) {
-                    const date = new Date(2024, new Date(Date.parse(month + " 1, 2024")).getMonth(), day);
-                    week.push({ date: `${month} ${day < 10 ? '0' + day : day}-2024`, isWeekend: date.getDay() === 0 || date.getDay() === 6 });
+                    const date = new Date(year, month - 1, day); // month is 0-indexed
+                    week.push({ date: `${String(day).padStart(2, '0')}-${String(month).padStart(2, '0')}-${year}`, isWeekend: date.getDay() === 0 || date.getDay() === 6 });
                     if (week.length === 7 || day === daysInMonth) {
                         weeks.push(week);
                         week = [];
@@ -223,18 +228,6 @@
                     <label for="month">Select Month:</label>
                     <select id="month" name="month" required>
                         <option value="">--Select Month--</option>
-                        <option value="January">January</option>
-                        <option value="February">February</option>
-                        <option value="March">March</option>
-                        <option value="April">April</option>
-                        <option value="May">May</option>
-                        <option value="June">June</option>
-                        <option value="July">July</option>
-                        <option value="August">August</option>
-                        <option value="September">September</option>
-                        <option value="October">October</option>
-                        <option value="November">November</option>
-                        <option value="December">December</option>
                     </select>
                 </div>
 
@@ -276,4 +269,6 @@
                 </div>
             </form>
         </main>
-    </div
+    </div>
+</body>
+</html>
