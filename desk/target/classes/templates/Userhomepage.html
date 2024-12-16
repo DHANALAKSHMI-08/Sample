@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Book a Seat</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(to right, #001f3f, #1e3c72); /* Dark blue gradient */
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #fff;
+        }
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+            color: #fff;
+            font-size: 2em;
+        }
+        .form-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 20px;
+            background: rgba(255, 255, 255, 0.1); /* Light transparency */
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+            color: #fff;
+            font-weight: bold; /* Make the label bold for better visibility */
+        }
+        select, input[type="date"], input[type="time"] {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #3498db;
+            border-radius: 5px;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff; /* Make the text inside input and select fields white */
+        }
+        select option {
+            background: #001f3f; /* Dark background for options */
+            color: #fff; /* White text for options */
+        }
+        select:focus, input[type="date"]:focus, input[type="time"]:focus {
+            border: 1px solid #3498db;
+            outline: none;
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            margin-top: 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .alert {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #ffcccb;
+            color: #333;
+            padding: 10px 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+        .seats-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            width: 100%;
+        }
+        .form-container, .seats-container iframe {
+            flex: 1;
+        }
+        iframe {
+            width: 100%;
+            height: 100vh;
+            border: none;
+        }
+        .summary-box {
+            margin-top: 20px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            color: #fff;
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentDate = new Date();
+            const nextMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
+            const monthSelect = document.getElementById('month');
+            monthSelect.value = nextMonth.toISOString().split('T')[0].slice(0, 7);
+            generateWeekContainers(nextMonth);
+        });
+
+        function handleMonthChange() {
+            const monthSelect = document.getElementById('month');
+            const selectedMonth = new Date(monthSelect.value + '-01');
+            generateWeekContainers(selectedMonth);
+        }
+
+        function generateWeekContainers(month) {
+            const weekContainer = document.getElementById('weekContainer');
+            weekContainer.innerHTML = '';
+            const daysInMonth = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate();
+            let weekNumber = 1;
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(month.getFullYear(), month.getMonth(), day);
+                if (date.getDay() === 0 || date.getDay() === 6) continue; // Skip weekends
+
+                if (weekContainer.querySelectorAll(`.week${weekNumber} input`).length >= 3) {
+                    weekNumber++;
+                }
+
+                if (!weekContainer.querySelector(`.week${weekNumber}`)) {
+                    const weekDiv = document.createElement('div');
+                    weekDiv.className = `week-container week${weekNumber}`;
+                    weekDiv.innerHTML = `<label>Week ${weekNumber}:</label>`;
+                    weekContainer.appendChild(weekDiv);
+                }
+
+                const input = document.createElement('input');
+                input.type = 'date';
+                input.className = `date-input week${weekNumber}`;
+                input.value = date.toISOString().split('T')[0];
+                input.onchange = handleDateChange;
+                weekContainer.querySelector(`.week${weekNumber}`).appendChild(input);
+            }
+        }
+
+        function handleBookingTypeChange() {
+            const bookingType = document.getElementById('bookingType').value;
+            const weekContainers = document.querySelectorAll('.week-container');
+            const reasonLabel = document.getElementById('reasonLabel');
+            const reasonSelect = document.getElementById('reasonSelect');
+            weekContainers.forEach(container => {
+                container.style.display = bookingType === 'irregular' ? 'none' : 'block';
+            });
+            reasonLabel.style.display = bookingType === 'irregular' ? 'block' : 'none';
+            reasonSelect.style.display = bookingType === 'irregular' ? 'block' : 'none';
+        }
+
+        function handleDateChange(event) {
+            const bookingType = document.getElementById('bookingType').value;
+            const selectedDates = document.querySelectorAll('.date-input.selected');
+            const currentDate = new Date();
+            const nextMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
+            const maxDate = new Date(nextMonth.getFullYear(), nextMonth.getMonth() + 1, 0);
+
+            if (event.target.value < nextMonth.toISOString().split('T')[0] || event.target.value > maxDate.toISOString().split('T')[0]) {
+                event.target.value = '';
+                showAlert('Select a date within the next month.');
+                return;
+            }
+
+            if (Array.from(selectedDates).some(input => input.value === event.target.value)) {
+                event.target.value = '';
+                showAlert('You cannot select the same date twice.');
+                return;
+            }
+
+            if (bookingType === 'regular' && selectedDates.length >= 3) {
+                event.target.value = '';
+                showAlert('You can only select up to 3 days per week for regular booking.');
+                return;
+            }
+
+            const totalWeeks = Math.ceil((maxDate.getDate() - nextMonth.getDate() + 1) / 7);
+            const maxDays = totalWeeks * 3;
+
+            if (bookingType === 'irregular' && selectedDates.length >= maxDays) {
+                event.target.value = '';
+                showAlert(`You can only select up to ${maxDays} days for irregular booking.`);
+                return;
+            }
+
+            event.target.classList.add('selected');
+            updateSummaryBox();
+        }
+
+        function showAlert(message) {
+            const alertBox = document.createElement('div');
+            alertBox.className = 'alert';
+            alertBox.innerText = message;
+            document.body.appendChild(alertBox);
+            setTimeout(() => {
+                document.body.removeChild(alertBox);
+            }, 3000);
+        }
+
+        function handleShowSeats() {
+            const location = document.getElementById('location').value;
+            const iframe = document.getElementById('seatsIframe');
+            if (location === '1') {
+                iframe.src = '/seats/ckc';
+            } else if (location === '2') {
+                iframe.src = '/seats/mepz';
+           }
+           
+           
+            else {
+                alert('Please select a valid location');
+            }
+        }
+
+        function updateSummaryBox() {
+            const selectedDates = document.querySelectorAll('.date-input.selected');
+            const summaryBox = document.getElementById('summaryBox');
+            summaryBox.innerHTML = '<strong>Selected Dates:</strong><br>';
+            selectedDates.forEach(input => {
+                summaryBox.innerHTML += `${input.value}<br>`;
+            });
+        }
+    </script>
+</head>
+<body>
+    <div class="seats-container">
+        <div class="form-container">
+            <h1>Book a Seat</h1>
+            <form th:action="@{/bookings/seats}" method="get">
+                <div>
+                    <label for="month">Month:</label>
+                    <select id="month" name="month" onchange="handleMonthChange()">
+                        <option value="">Select an option</option>
+                        <option value="2025-01">January 2025</option>
+                        <option value="2025-02">February 2025</option>
+                        <option value="2025-03">March 2025</option>
+                        <option value="2025-04">April 2025</option>
+                        <option value="2025-05">May 2025</option>
+                        <option value="2025-06">June 2025</option>
+                        <option value="2025-07">July 2025</option>
+                        <option value="2025-08">August 2025</option>
+                        <option value="2025-09">September 2025</option>
+                        <option value="2025-10">October 2025</option>
+                        <option value="2025-11">November 2025</option>
+                        <option value="2025-12">December 2025</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="location">Location:</label>
+                    <select id="location" name="locationId">
+                        <option value="">Select an option</option>
+                        <option value="1">CKC-Chennai</option>
+                        <option value="2">MEPZ-Chennai</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="bookingType">Booking Type:</label>
+                    <select id="bookingType" name="bookingType" onchange="handleBookingTypeChange()">
+                        <option value="">Select an option</option>
+                        <option value="regular">Regular</option>
+                        <option value="irregular">Irregular</option>
+                    </select>
+                </div>
+                <div id="weekContainer"></div>
+                <div id="reasonLabel" style="display: none;">
+                    <label for="reason">Reason:</label>
+                    <select id="reasonSelect" name="reason">
+                        <option value="holiday">Holiday</option>
+                        <option value="casual leave">Casual Leave</option>
+                        <option value="earned leave">Earned Leave</option>
+                        <option value="sick leave">Sick Leave</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="startTime">Start Time:</label>
+                    <input type="time" id="startTime" name="startTime">
+                </div>
+                <div>
+                    <label for="endTime">End Time:</label>
+                    <input type="time" id="endTime" name="endTime">
+                </div>
+                <button type="button" onclick="handleShowSeats()">Show Seats</button>
+            </form>
+            <div id="summaryBox" class="summary-box"></div>
+        </div>
+        <iframe id="seatsIframe"></iframe>
+    </div>
+</body>
+</html>

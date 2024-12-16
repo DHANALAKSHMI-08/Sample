@@ -1,0 +1,365 @@
+<<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CKC-Chennai Seat Arrangement</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+            color: #333;
+            font-size: 24px;
+        }
+        .seats-container {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .seat, .double-seat, .cubicle, .meeting-room, .door {
+            text-align: center;
+            line-height: 50px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            transition: background-color 0.3s, transform 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        .seat:hover, .double-seat div:hover, .cubicle-seat:hover {
+            background-color: #4CAF50;
+            transform: translateY(-5px);
+            cursor: pointer;
+        }
+        .seat {
+            width: 50px;
+            height: 50px;
+            background-color: green;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .double-seat {
+            width: 100px;
+            height: 50px; /* Horizontal rectangle */
+            display: flex;
+            justify-content: space-between;
+        }
+        .double-seat div {
+            width: 50px;
+            height: 50px;
+        }
+        .cubicle {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5px;
+            grid-column: span 1;
+            grid-row: span 1;
+            background-color: #4CAF50;
+        }
+        .cubicle-seat {
+            width: 40px; /* Reduced size */
+            height: 40px;
+        }
+        .meeting-room {
+            grid-column: span 2;
+            grid-row: span 2;
+            background-color: blue;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            border-radius: 10px;
+        }
+        .door {
+            grid-column: span 1;
+            grid-row: span 1;
+            background-color: black;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .path {
+            grid-column: span 1;
+            grid-row: span 1;
+            background-color: #ddd;
+        }
+        .vacant {
+            background-color: green;
+        }
+        .booked {
+            background-color: red;
+        }
+        .tooltip {
+            display: none;
+            position: absolute;
+            top: -5px;
+            left: 105%;
+            background-color: #333;
+            color: #fff;
+            padding: 5px;
+            border-radius: 5px;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+        .seat:hover .tooltip, .double-seat div:hover .tooltip, .cubicle-seat:hover .tooltip {
+            display: block;
+        }
+        
+        .save-button {
+         margin-top: 20px;
+          display: block;
+           width: 100px; 
+           height: 40px; 
+           background-color: #4CAF50; 
+           color: white;
+            border: none; 
+            border-radius: 5px; 
+            font-size: 16px; cursor: pointer; text-align: center; line-height: 40px; transition: background-color 0.3s, transform 0.3s; 
+         } 
+         .save-button:hover 
+         { 
+         background-color: #45a049; 
+         transform: translateY(-3px); 
+         }
+    </style>
+    <script>
+        function handleSeatClick(event) {
+            const seat = event.target;
+            if (seat.classList.contains('vacant')) {
+                seat.classList.remove('vacant');
+                seat.classList.add('booked');
+            } else if (seat.classList.contains('booked')) {
+                seat.classList.remove('booked');
+                seat.classList.add('vacant');
+            }
+            alert(`Seat Number: ${seat.textContent.trim()}`);
+            // Add logic to update the booking status in the backend
+        }
+
+        // Add event listeners to all seats once the DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.seat, .double-seat div, .cubicle-seat').forEach(seat => {
+                seat.addEventListener('click', handleSeatClick);
+            });
+        });
+        
+        
+        const bookedSeats = []; 
+        function handleSeatClick(event) 
+        { const seat = event.target; 
+        if (seat.classList.contains('vacant'))
+        { seat.classList.remove('vacant'); 
+        seat.classList.add('booked');
+        bookedSeats.push(seat.textContent.trim()); 
+        
+        } else if (seat.classList.contains('booked')) 
+        { 
+        	seat.classList.remove('booked'); seat.classList.add('vacant'); 
+        }
+        const index = bookedSeats.indexOf(seat.textContent.trim()); 
+        if (index > -1) {
+        	bookedSeats.splice(index, 1)
+        	; 
+        	}
+        }
+    </script>
+</head>
+<body>
+    <h1>CKC-Chennai Seat Arrangement</h1>
+    <div class="seats-container">
+        <!-- Row 1 -->
+        <div class="double-seat" id="seat-1">
+            <div class="vacant" id="seat-1-1">1 <span class="tooltip">Seat 1</span></div>
+            <div class="vacant" id="seat-1-2">2 <span class="tooltip">Seat 2</span></div>
+        </div>
+        <div class="double-seat" id="seat-32">
+            <div class="vacant" id="seat-32-1">32 <span class="tooltip">Seat 32</span></div>
+            <div class="vacant" id="seat-32-2">33 <span class="tooltip">Seat 33</span></div>
+        </div>
+        <div class="cubicle">
+            <div class="cubicle-seat vacant" id="seat-3">3 <span class="tooltip">Seat 3</span></div>
+            <div class="cubicle-seat vacant" id="seat-4">4 <span class="tooltip">Seat 4</span></div>
+            <div class="cubicle-seat vacant" id="seat-5">5 <span class="tooltip">Seat 5</span></div>
+            <div class="cubicle-seat vacant" id="seat-6">6 <span class="tooltip">Seat 6</span></div>
+        </div>
+        <div class="cubicle">
+            <div class="cubicle-seat vacant" id="seat-7">7 <span class="tooltip">Seat 7</span></div>
+            <div class="cubicle-seat vacant" id="seat-8">8 <span class="tooltip">Seat 8</span></div>
+            <div class="cubicle-seat vacant" id="seat-9">9 <span class="tooltip">Seat 9</span></div>
+            <div class="cubicle-seat vacant" id="seat-10">10 <span class="tooltip">Seat 10</span></div>
+        </div>
+        <div class="cubicle">
+            <div class="cubicle-seat vacant" id="seat-87">87 <span class="tooltip">Seat 87</span></div>
+            <div class="cubicle-seat vacant" id="seat-88">88 <span class="tooltip">Seat 88</span></div>
+            <div class="cubicle-seat vacant" id="seat-89">89 <span class="tooltip">Seat 89</span></div>
+            <div class="cubicle-seat vacant" id="seat-90">90 <span class="tooltip">Seat 90</span></div>
+        </div>
+        <div class="path"></div>
+        <div class="double-seat" id="seat-2">
+            <div class="vacant" id="seat-11">11 <span class="tooltip">Seat 11</span></div>
+            <div class="vacant" id="seat-12">12 <span class="tooltip">Seat 12</span></div>
+        </div>
+        <div class="double-seat" id="seat-2">
+            <div class="vacant" id="seat-13">13 <span class="tooltip">Seat 13</span></div>
+            <div class="vacant" id="seat-14">14 <span class="tooltip">Seat 14</span></div>
+        </div>
+        <div class="seat vacant" id="seat-15">15 <span class="tooltip">Seat 15</span></div>
+        <div class="seat vacant" id="seat-16">16 <span class="tooltip">Seat 16</span></div>
+        <div class="double-seat" id="seat-3">
+            <div class="vacant" id="seat-56">56 <span class="tooltip">Seat 56</span></div>
+            <div class="vacant" id="seat-57">57 <span class="tooltip">Seat 57</span></div>
+        </div>
+        <div class="double-seat" id="seat-3">
+            <div class="vacant" id="seat-83">83 <span class="tooltip">Seat 83</span></div>
+            <div class="vacant" id="seat-84">84 <span class="tooltip">Seat 84</span></div>
+        </div>
+
+                <div class="double-seat" id="seat-4">
+            <div class="vacant" id="seat-22">22 <span class="tooltip">Seat 22</span></div>
+            <div class="vacant" id="seat-23">23 <span class="tooltip">Seat 23</span></div>
+        </div>
+        <div class="seat vacant" id="seat-62">62 <span class="tooltip">Seat 62</span></div>
+        <div class="seat vacant" id="seat-63">63 <span class="tooltip">Seat 63</span></div>
+        <div class="seat vacant" id="seat-64">64 <span class="tooltip">Seat 64</span></div>
+        <div class="seat vacant" id="seat-65">65 <span class="tooltip">Seat 65</span></div>
+        <div class="double-seat" id="seat-5">
+            <div class="vacant" id="seat-74">74 <span class="tooltip">Seat 74</span></div>
+            <div class="vacant" id="seat-34">34 <span class="tooltip">Seat 34</span></div>
+        </div>
+        <div class="double-seat" id="seat-6">
+            <div class="vacant" id="seat-35">35 <span class="tooltip">Seat 35</span></div>
+            <div class="vacant" id="seat-36">36 <span class="tooltip">Seat 36</span></div>
+        </div>
+        <div class="cubicle">
+            <div class="cubicle-seat vacant" id="seat-37">37 <span class="tooltip">Seat 37</span></div>
+            <div class="cubicle-seat vacant" id="seat-38">38 <span class="tooltip">Seat 38</span></div>
+            <div class="cubicle-seat vacant" id="seat-39">39 <span class="tooltip">Seat 39</span></div>
+            <div class="cubicle-seat vacant" id="seat-40">40 <span class="tooltip">Seat 40</span></div>
+        </div>
+        <div class="double-seat" id="seat-7">
+            <div class="vacant" id="seat-41">41 <span class="tooltip">Seat 41</span></div>
+            <div class="vacant" id="seat-42">42 <span class="tooltip">Seat 42</span></div>
+        </div>
+        <div class="double-seat" id="seat-8">
+            <div class="vacant" id="seat-43">43 <span class="tooltip">Seat 43</span></div>
+            <div class="vacant" id="seat-44">44 <span class="tooltip">Seat 44</span></div>
+        </div>
+
+        <!-- Row 3 -->
+        <div class="double-seat" id="seat-9">
+            <div class="vacant" id="seat-54">54 <span class="tooltip">Seat 54</span></div>
+            <div class="vacant" id="seat-55">55 <span class="tooltip">Seat 55</span></div>
+        </div>
+        <div class="double-seat" id="seat-10">
+            <div class="vacant" id="seat-53">53 <span class="tooltip">Seat 53</span></div>
+            <div class="vacant" id="seat-52">52 <span class="tooltip">Seat 52</span></div>
+        </div>
+        <div class="cubicle">
+            <div class="cubicle-seat vacant" id="seat-45">45 <span class="tooltip">Seat 45</span></div>
+            <div class="cubicle-seat vacant" id="seat-46">46 <span class="tooltip">Seat 46</span></div>
+            <div class="cubicle-seat vacant" id="seat-47">47 <span class="tooltip">Seat 47</span></div>
+            <div class="cubicle-seat vacant" id="seat-48">48 <span class="tooltip">Seat 48</span></div>
+        </div>
+        <div class="cubicle">
+            <div class="cubicle-seat vacant" id="seat-49">49 <span class="tooltip">Seat 49</span></div>
+            <div class="cubicle-seat vacant" id="seat-50">50 <span class="tooltip">Seat 50</span></div>
+            <div class="cubicle-seat vacant" id="seat-51">51 <span class="tooltip">Seat 51</span></div>
+            <div class="cubicle-seat vacant" id="seat-52">52 <span class="tooltip">Seat 52</span></div>
+        </div>
+        <div class="double-seat" id="seat-11">
+            <div class="vacant" id="seat-53">53 <span class="tooltip">Seat 53</span></div>
+            <div class="vacant" id="seat-54">54 <span class="tooltip">Seat 54</span></div>
+        </div>
+        <div class="seat vacant" id="seat-55">55 <span class="tooltip">Seat 55</span></div>
+        <div class="double-seat" id="seat-12">
+            <div class="vacant" id="seat-56">56 <span class="tooltip">Seat 56</span></div>
+            <div class="vacant" id="seat-57">57 <span class="tooltip">Seat 57</span></div>
+        </div>
+        <div class="cubicle">
+            <div class="cubicle-seat vacant" id="seat-58">58 <span class="tooltip">Seat 58</span></div>
+            <div class="cubicle-seat vacant" id="seat-59">59 <span class="tooltip">Seat 59</span></div>
+            <div class="cubicle-seat vacant" id="seat-60">60 <span class="tooltip">Seat 60</span></div>
+            <div class="cubicle-seat vacant" id="seat-61">61 <span class="tooltip">Seat 61</span></div>
+        </div>
+        <div class="double-seat" id="seat-13">
+            <div class="vacant" id="seat-62">62 <span class="tooltip">Seat 62</span></div>
+            <div class="vacant" id="seat-63">63 <span class="tooltip">Seat 63</span></div>
+        </div>
+
+        <!-- Path -->
+        <div class="path"></div>
+
+        <!-- Row 4 -->
+        <div class="double-seat" id="seat-14">
+            <div class="vacant" id="seat-64">64 <span class="tooltip">Seat 64</span></div>
+            <div class="vacant" id="seat-65">65 <span class="tooltip">Seat 65</span></div>
+        </div>
+        <div class="cubicle">
+            <div class="cubicle-seat vacant" id="seat-66">66 <span class="tooltip">Seat 66</span></div>
+            <div class="cubicle-seat vacant" id="seat-67">67 <span class="tooltip">Seat 67</span></div>
+            <div class="cubicle-seat vacant" id="seat-68">68 <span class="tooltip">Seat 68</span></div>
+            <div class="cubicle-seat vacant" id="seat-69">69 <span class="tooltip">Seat 69</span></div>
+        </div>
+        <div class="path"></div>
+        <div class="cubicle">
+            <div class="cubicle-seat vacant" id="seat-70">70 <span class="tooltip">Seat 70</span></div>
+            <div class="cubicle-seat vacant" id="seat-71">71 <span class="tooltip">Seat 71</span></div>
+            <div class="cubicle-seat vacant" id="seat-72">72 <span class="tooltip">Seat 72</span></div>
+            <div class="cubicle-seat vacant" id="seat-73">73 <span class="tooltip">Seat 73</span></div>
+        </div>
+        <div class="double-seat" id="seat-15">
+            <div class="vacant" id="seat-74">74 <span class="tooltip">Seat 74</span></div>
+            <div class="vacant" id="seat-75">75 <span class="tooltip">Seat 75</span></div>
+        </div>
+        <div class="seat vacant" id="seat-76">76 <span class="tooltip">Seat 76</span></div>
+        <div class="double-seat" id="seat-16">
+            <div class="vacant" id="seat-77">77 <span class="tooltip">Seat 77</span></div>
+            <div class="vacant" id="seat-78">78 <span class="tooltip">Seat 78</span></div>
+        </div>
+        <div class="cubicle">
+        
+        
+        
+        
+                    <div class="cubicle-seat vacant" id="seat-80">80 <span class="tooltip">Seat 80</span></div>
+            <div class="cubicle-seat vacant" id="seat-81">81 <span class="tooltip">Seat 81</span></div>
+            <div class="cubicle-seat vacant" id="seat-82">82 <span class="tooltip">Seat 82</span></div>
+        </div>
+        <div class="double-seat" id="seat-17">
+            <div class="vacant" id="seat-83">83 <span class="tooltip">Seat 83</span></div>
+            <div class="vacant" id="seat-84">84 <span class="tooltip">Seat 84</span></div>
+        </div>
+
+        <!-- Path -->
+        <div class="path"></div>
+
+        <!-- Row 5 -->
+        <div class="double-seat" id="seat-18">
+            <div class="vacant" id="seat-85">85 <span class="tooltip">Seat 85</span></div>
+            <div class="vacant" id="seat-86">86 <span class="tooltip">Seat 86</span></div>
+        </div>
+        <div class="cubicle">
+            <div class="cubicle-seat vacant" id="seat-87">87 <span class="tooltip">Seat 87</span></div>
+            <div class="cubicle-seat vacant" id="seat-88">88 <span class="tooltip">Seat 88</span></div>
+            <div class="cubicle-seat vacant" id="seat-89">89 <span class="tooltip">Seat 89</span></div>
+            <div class="cubicle-seat vacant" id="seat-90">90 <span class="tooltip">Seat 90</span></div>
+        </div>
+        <div class="meeting-room">Meeting Room</div>
+        <div class="door">Door</div>
+    </div>
+    <button id="save-button" class="save-button">Save</button>
+</body>
+</html>
+        
+        
